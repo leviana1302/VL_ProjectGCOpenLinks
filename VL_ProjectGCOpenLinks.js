@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         VL_ProjectGCOpenLinks_Safari
 // @namespace    http://tampermonkey.net/
-// @version      1.2
+// @version      1.3
 // @description  Öffnet die ersten N nicht-gecheckte coord.info Links in neuen Tabs (Safari optimiert)
 // @author       Verena
 // @match        https://project-gc.com/User/VirtualGPS*
@@ -12,7 +12,7 @@
 // ==/UserScript==
 
 (function() {
-    'use strict';
+    'use strict'; 
 
     setTimeout(function() {
         const vgpsMenu = document.getElementById('vgps-menu');
