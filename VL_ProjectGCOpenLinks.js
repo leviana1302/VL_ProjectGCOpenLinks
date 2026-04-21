@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         VL_ProjectGCOpenLinks
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      1.1
 // @description  Öffnet die ersten N nicht-gecheckte coord.info Links in neuen Tabs und aktiviert deren Checkboxen
 // @author       Verena
 // @match        https://project-gc.com/User/VirtualGPS*
@@ -114,10 +114,21 @@
                         checkbox.dispatchEvent(new Event('change', { bubbles: true }));
                         checkbox.dispatchEvent(new Event('click', { bubbles: true }));
 
-                        // Öffne Link
-                        window.open(link.href, '_blank');
+                        // Speichere altes target
+                        const oldTarget = link.getAttribute('target');
+
+                        // Setze target="_blank" und klicke
+                        link.setAttribute('target', '_blank');
+                        link.click();
+
+                        // Stelle altes target wieder her
+                        if (oldTarget) {
+                            link.setAttribute('target', oldTarget);
+                        } else {
+                            link.removeAttribute('target');
+                        }
                     }
-                }, index * 300);
+                }, index * 800);
             });
 
             console.log(`${selectedRows.length} Links geplant`);
