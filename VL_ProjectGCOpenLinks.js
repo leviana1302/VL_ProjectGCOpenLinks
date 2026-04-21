@@ -1,12 +1,12 @@
 // ==UserScript==
-// @name         VL_ProjectGCOpenLinks
+// @name         VL_ProjectGCOpenLinks_Safari
 // @namespace    http://tampermonkey.net/
-// @version      1.1
-// @description  Öffnet die ersten N nicht-gecheckte coord.info Links in neuen Tabs und aktiviert deren Checkboxen
+// @version      1.2
+// @description  Öffnet die ersten N nicht-gecheckte coord.info Links in neuen Tabs (Safari optimiert)
 // @author       Verena
 // @match        https://project-gc.com/User/VirtualGPS*
-// @updateURL    https://raw.githubusercontent.com/leviana1302/VL_ProjectGCOpenLinks/main/VL_ProjectGCOpenLinks.js
-// @downloadURL  https://raw.githubusercontent.com/leviana1302/VL_ProjectGCOpenLinks/main/VL_ProjectGCOpenLinks.js
+// @updateURL    https://raw.githubusercontent.com/leviana1302/VL_ProjectGCOpenLinks/main/VL_ProjectGCOpenLinks_Safari.js
+// @downloadURL  https://raw.githubusercontent.com/leviana1302/VL_ProjectGCOpenLinks/main/VL_ProjectGCOpenLinks_Safari.js
 // @grant        none
 // @run-at       document-end
 // ==/UserScript==
@@ -74,15 +74,12 @@
                 return;
             }
 
-            // Hole die gewählte Anzahl
             const count = parseInt(select.value);
-            console.log(`Öffne ${count} nicht-gecheckte Links`);
+            console.log(`Öffne ${count} nicht-gecheckte Links (Safari optimiert)`);
 
-            // Finde alle Reihen in der Tabelle
             const allRows = vgpsTable.querySelectorAll('div[role="row"]');
             console.log(`Gefundene Zeilen: ${allRows.length}`);
 
-            // Filtere Reihen mit unchecked Checkboxen und coord.info Links
             const uncheckedRows = Array.from(allRows).filter(row => {
                 const checkbox = row.querySelector('input[type="checkbox"]');
                 const link = row.querySelector('a[href^="https://coord.info/"]');
@@ -91,7 +88,6 @@
 
             console.log(`Nicht-gecheckte Reihen mit Links: ${uncheckedRows.length}`);
 
-            // Nimm nur die ersten N
             const selectedRows = uncheckedRows.slice(0, count);
             console.log(`Öffne: ${selectedRows.length} Links`);
 
@@ -100,38 +96,35 @@
                 return;
             }
 
-            // Öffne Links und aktiviere Checkboxen
+            // SAFARI OPTIMIERT: Sehr kurze Verzögerung (50ms)
             selectedRows.forEach((row, index) => {
                 setTimeout(() => {
                     const link = row.querySelector('a[href^="https://coord.info/"]');
                     const checkbox = row.querySelector('input[type="checkbox"]');
 
                     if (link && checkbox) {
-                        console.log(`Öffne Link ${index + 1}: ${link.href}`);
+                        console.log(`Safari: Link ${index + 1} - ${link.href}`);
 
-                        // Aktiviere Checkbox
+                        // Aktiviere Checkbox ZUERST
                         checkbox.checked = true;
                         checkbox.dispatchEvent(new Event('change', { bubbles: true }));
                         checkbox.dispatchEvent(new Event('click', { bubbles: true }));
 
-                        // Speichere altes target
+                        // Dann öffne den Link
                         const oldTarget = link.getAttribute('target');
-
-                        // Setze target="_blank" und klicke
                         link.setAttribute('target', '_blank');
                         link.click();
 
-                        // Stelle altes target wieder her
                         if (oldTarget) {
                             link.setAttribute('target', oldTarget);
                         } else {
                             link.removeAttribute('target');
                         }
                     }
-                }, index * 800);
+                }, index * 50); // SAFARI: Nur 50ms Verzögerung!
             });
 
-            console.log(`${selectedRows.length} Links geplant`);
+            console.log(`${selectedRows.length} Links geplant (50ms Verzögerung)`);
         });
 
         button.addEventListener('mouseover', function() {
