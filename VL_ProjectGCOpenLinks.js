@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         VL_ProjectGCOpenLinks_Safari
 // @namespace    http://tampermonkey.net/
-// @version      1.3
+// @version      1.4
 // @description  Öffnet die ersten N nicht-gecheckte coord.info Links in neuen Tabs (Safari optimiert)
 // @author       Verena
 // @match        https://project-gc.com/User/VirtualGPS*
@@ -12,11 +12,11 @@
 // ==/UserScript==
 
 (function() {
-    'use strict'; 
+    'use strict';
 
     setTimeout(function() {
         const vgpsMenu = document.getElementById('vgps-menu');
-
+        
         if (!vgpsMenu) {
             console.log('vgps-menu nicht gefunden');
             return;
@@ -33,7 +33,7 @@
             background-color: #f5f5f5;
             cursor: pointer;
         `;
-
+        
         [5, 10, 15, 20].forEach(num => {
             const option = document.createElement('option');
             option.value = num;
@@ -68,7 +68,7 @@
         // Click-Handler für den Button
         button.addEventListener('click', function() {
             const vgpsTable = document.getElementById('vgps-table');
-
+            
             if (!vgpsTable) {
                 console.log('vgps-table nicht gefunden');
                 return;
@@ -96,35 +96,32 @@
                 return;
             }
 
-            // SAFARI OPTIMIERT: Sehr kurze Verzögerung (50ms)
+            // SAFARI FIX: Sammle alle URLs ZUERST
+            const urlsToOpen = selectedRows.map(row => {
+                const link = row.querySelector('a[href^="https://coord.info/"]');
+                return link ? link.href : null;
+            }).filter(Boolean);
+
+            console.log('URLs zum Öffnen:', urlsToOpen);
+
+            // Öffne ALLE URLs DIREKT (synchron) - nur so akzeptiert Safari!
+            urlsToOpen.forEach((url, index) => {
+                console.log(`Öffne direkt: ${url}`);
+                window.open(url, '_blank');
+            });
+
+            // Aktiviere Checkboxen DANACH mit Verzögerung (das funktioniert)
             selectedRows.forEach((row, index) => {
                 setTimeout(() => {
-                    const link = row.querySelector('a[href^="https://coord.info/"]');
                     const checkbox = row.querySelector('input[type="checkbox"]');
-
-                    if (link && checkbox) {
-                        console.log(`Safari: Link ${index + 1} - ${link.href}`);
-
-                        // Aktiviere Checkbox ZUERST
+                    if (checkbox) {
+                        console.log(`Checkbox ${index + 1} aktiviert`);
                         checkbox.checked = true;
                         checkbox.dispatchEvent(new Event('change', { bubbles: true }));
                         checkbox.dispatchEvent(new Event('click', { bubbles: true }));
-
-                        // Dann öffne den Link
-                        const oldTarget = link.getAttribute('target');
-                        link.setAttribute('target', '_blank');
-                        link.click();
-
-                        if (oldTarget) {
-                            link.setAttribute('target', oldTarget);
-                        } else {
-                            link.removeAttribute('target');
-                        }
                     }
-                }, index * 50); // SAFARI: Nur 50ms Verzögerung!
+                }, index * 50);
             });
-
-            console.log(`${selectedRows.length} Links geplant (50ms Verzögerung)`);
         });
 
         button.addEventListener('mouseover', function() {
